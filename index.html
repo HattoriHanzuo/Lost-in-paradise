@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+
+
+<html>
+
+
+	<head>
+
+
+		<title></title>
+
+		<style type="text/css">
+			
+			#main_canvas{
+				position: fixed;
+				top: 48px;
+				height: 480px;
+				width: 640px;
+				background-color: darkgray;
+			}
+
+			.coords{
+				font-size: 42px;
+			}
+
+		</style>
+
+	</head>
+
+
+	<body>
+		
+		
+		<div id="game_object">
+		<canvas width="320" height="240" id="main_canvas">No Sorry!!!</canvas>
+		</div>
+
+
+		<script type="text/javascript">
+
+			var w = new Image(320,105);
+			w.src = "wolken.png";
+			
+			var wa = new Image(320,103);
+			wa.src = "wasser.png";
+
+			var s = new Image(320,33);
+			s.src = "sand.png";
+
+			var ch = new Image(24,14);
+			ch.src = "chicken.png";
+
+			var bo = new Image(32,25);
+			bo.src = "boot.png";
+
+			var mu = new Image(24,14);
+			mu.src = "muschel.png";
+
+			var ho = new Image(24,14);
+			ho.src = "holz.png";
+
+			var kak = new Image(24,14);
+			kak.src = "kaktus.png";
+
+			
+		var version = '0.0.1';
+		var space = false;
+		var laufTimer = 10;
+		var ch_bild = 0;
+		var laufAnimation = [0,1,0,2];
+		var spiellaeuft = false;	
+		var interval = 0;
+
+		
+		function init() {
+			main_canvas = document.getElementById('main_canvas');
+			main_ctx = main_canvas.getContext('2d');
+
+				document.addEventListener("keydown" ,key_down,false);
+				document.addEventListener("keyup" ,key_up,false);
+			
+		}
+		init();	
+
+		//Chicken
+		var ch_y = 0;
+		var y_speed = 0;
+		//Wasser
+		var wa_x = 0;
+		//Sand
+		var s_x = 0;
+		//Wolken
+		var w_x = 0;
+		//Boot
+		var b_x = 0;
+		var b1_x = 0;
+		var b2_x = 0;		
+		var kak_x = 0;
+
+		function zeichnen(){
+			var bild = laufAnimation[ch_bild];
+			main_ctx.drawImage(w,0+w_x,0,320,105);
+			main_ctx.drawImage(w,320+w_x,0,320,105);
+			main_ctx.drawImage(wa, 0+wa_x,105,320,103);
+			main_ctx.drawImage(wa, 320+wa_x,105,320,103);
+			main_ctx.drawImage(s,0+s_x,208,320,33);
+			main_ctx.drawImage(s,320+s_x,208,320,33);
+			main_ctx.drawImage(bo,50+b_x,130,42,35);
+			main_ctx.drawImage(bo,160+b1_x,130,22,15);
+			main_ctx.drawImage(bo,370+b2_x,150,32,25);
+			main_ctx.drawImage(kak,320+kak_x,150,32,25);
+			main_ctx.drawImage(ch,0+8*bild,0,8,14,50,205-ch_y,16,28);
+			laufTimer--;
+			if (laufTimer <= 0){
+				ch_bild++;
+				laufTimer = 10;
+				
+				if (ch_bild > 3) {
+					ch_bild = 0;
+				}	
+
+			}
+
+			if (ch_y > 0){
+				ch_y+=y_speed;
+				y_speed-= 0.2;
+			}
+
+			if(ch_y < 0){
+				ch_y = 0;
+				y_speed = 0;
+			}
+
+			wa_x -= 0.3;
+			s_x -= 1.4;
+			w_x -= 0.3;
+			b_x -= 0.2;
+			b1_x -= 0.2;			
+			b2_x -= 0.3;
+			kak_x -= 1.4;						
+			
+			if (wa_x <= -320){
+				wa_x += 320;
+			}
+
+			if (s_x <= -320){
+				s_x +=  320;
+			}
+
+			if (w_x <= -320){
+				w_x += 320;
+			}
+
+			if (b_x <= -320){
+				b_x += 320;
+			}
+
+			if (b1_x <= -320){
+				b1_x += 320;
+			}
+
+			if (b2_x <= -400){
+				b2_x += 400;
+			}
+
+		}
+
+		
+
+		
+		function key_down(e){
+				
+			var key_id = e.keyCode || e.which;
+			
+				
+				if (key_id == 32){
+					space = true;
+					e.preventDefault();
+					if (ch_y <= 20){
+						y_speed = 5;
+						ch_y = 1;
+
+					}
+
+
+					if (spiellaeuft == false){	
+						interval = window.setInterval(zeichnen,10);
+						spiellaeuft = true;
+					}
+				}
+			
+			}
+
+		
+
+
+		function key_up(e){
+				var key_id = e.keyCode || e.which;
+								
+				if (key_id == 32){
+					space = false;
+					e.preventDefault();
+				}
+
+
+			}
+
+
+		
+		</script>
+
+	</body>
+
+
+</html>
