@@ -16,11 +16,21 @@
 				top: 48px;
 				height: 480px;
 				width: 640px;
-				background-color: darkgray;
+				background-color: #157899;
+				 image-rendering: optimizeSpeed;            
+				 image-rendering: -moz-crisp-edges;         
+				 image-rendering: -webkit-optimize-contrast;
+				 image-rendering: -o-crisp-edges;           
+				 image-rendering: pixelated;                
+				 -ms-interpolation-mode: nearest-neighbor;
 			}
 
 			.coords{
 				font-size: 42px;
+			}
+
+			audio{
+				display: none;
 			}
 
 		</style>
@@ -31,9 +41,14 @@
 	<body>
 		
 		
-		<div id="game_object">
+		
 		<canvas width="320" height="240" id="main_canvas">No Sorry!!!</canvas>
-		</div>
+
+		<audio id="audio_bok" 
+		  controls
+		  src="bok.ogg" 
+		  type="audio/ogg">
+		</audio>
 
 
 		<script type="text/javascript">
@@ -52,15 +67,16 @@
 
 			var bo = new Image(32,25);
 			bo.src = "boot.png";
-
-			var mu = new Image(24,14);
-			mu.src = "muschel.png";
-
-			var ho = new Image(24,14);
-			ho.src = "holz.png";
-
+		
 			var kak = new Image(24,14);
 			kak.src = "kaktus.png";
+
+			var fe = new Image(24,14);
+			fe.src = "feuer.png";
+
+			var punkteTimer = 50;
+
+			var punkte = 0;
 
 			
 		var version = '0.0.1';
@@ -69,7 +85,7 @@
 		var ch_bild = 0;
 		var laufAnimation = [0,1,0,2];
 		var spiellaeuft = false;	
-		var interval = 0;
+		var geschwindigkeit = 1;
 
 		
 		function init() {
@@ -78,12 +94,17 @@
 
 				document.addEventListener("keydown" ,key_down,false);
 				document.addEventListener("keyup" ,key_up,false);
+
+				main_ctx.font="18px Verdana";
+				main_ctx.fillText("Press space to begin",55,100);
 			
 		}
 		init();	
 
 		//Chicken
 		var ch_y = 0;
+		var ch_lebt = true;
+		var ch_brennt = false;
 		var y_speed = 0;
 		//Wasser
 		var wa_x = 0;
@@ -95,7 +116,41 @@
 		var b_x = 0;
 		var b1_x = 0;
 		var b2_x = 0;		
-		var kak_x = 0;
+		//Kaktus
+		var kak_x = 320;
+		//Feuer
+		var feu_bild = 0;
+		var fe_x = 450;
+
+
+		function restart(){
+			//Chicken
+			ch_y = 0;
+			ch_lebt = true;
+			ch_brennt = false;
+			y_speed = 0;
+			//Wasser
+			wa_x = 0;
+			//Sand
+			s_x = 0;
+			//Wolken
+			w_x = 0;
+			//Boot
+			b_x = 0;
+			b1_x = 0;
+			b2_x = 0;		
+			//Kaktus
+			kak_x = 320;
+			
+
+			fe_x = 450;
+
+			geschwindigkeit = 1;
+
+			punkteTimer = 50;
+
+			punkte = 0;
+		}
 
 		function zeichnen(){
 			var bild = laufAnimation[ch_bild];
@@ -105,39 +160,79 @@
 			main_ctx.drawImage(wa, 320+wa_x,105,320,103);
 			main_ctx.drawImage(s,0+s_x,208,320,33);
 			main_ctx.drawImage(s,320+s_x,208,320,33);
-			main_ctx.drawImage(bo,50+b_x,130,42,35);
 			main_ctx.drawImage(bo,160+b1_x,130,22,15);
+			main_ctx.drawImage(bo,50+b_x,130,42,35);
 			main_ctx.drawImage(bo,370+b2_x,150,32,25);
-			main_ctx.drawImage(kak,320+kak_x,150,32,25);
-			main_ctx.drawImage(ch,0+8*bild,0,8,14,50,205-ch_y,16,28);
+			main_ctx.drawImage(kak,kak_x,198 ,25,35);
+			if(!ch_brennt){
+				
+				if (ch_y >= 2){
+					main_ctx.drawImage(ch,48,0,16,28,50,205-ch_y,16,28);
+				}else{
+					main_ctx.drawImage(ch,0+16*bild,0,16,28,50,205-ch_y,16,28);
+				}
+			}
+			else{
+				main_ctx.drawImage(ch,64,0,16,28,50,205-ch_y,16,28);
+			}
+			main_ctx.drawImage(fe,0+26*feu_bild,0,26,32,fe_x,203,26,32);
+			main_ctx.font="18px Verdana";
+			main_ctx.fillText("Points: "+punkte,10,50);
+			if(!ch_lebt){
+			main_ctx.font="18px Verdana";
+			main_ctx.fillText("Press c to begin again",55,100);
+			}
+
 			laufTimer--;
 			if (laufTimer <= 0){
 				ch_bild++;
-				laufTimer = 10;
+				feu_bild++;
+					if (feu_bild >= 2){
+						feu_bild = 0;
+					}
+				laufTimer = 20;
 				
-				if (ch_bild > 3) {
+				if (ch_bild >3) {
 					ch_bild = 0;
 				}	
 
 			}
 
+			
 			if (ch_y > 0){
 				ch_y+=y_speed;
-				y_speed-= 0.2;
+				y_speed-= 0.1;
+
 			}
 
-			if(ch_y < 0){
+			if (ch_y < 0){
 				ch_y = 0;
 				y_speed = 0;
 			}
 
-			wa_x -= 0.3;
-			s_x -= 1.4;
-			w_x -= 0.3;
-			b_x -= 0.2;
-			b1_x -= 0.2;			
-			b2_x -= 0.3;
-			kak_x -= 1.4;						
+			geschwindigkeit += 0.00025;
+
+			if(geschwindigkeit >= 5 )
+				geschwindigkeit = 5;
+
+			if (ch_lebt){
+				wa_x -= 0.3*geschwindigkeit;
+				s_x -= 1.4*geschwindigkeit;
+				w_x -= 0.3*geschwindigkeit;
+				b_x -= 0.2*geschwindigkeit;
+				b1_x -= 0.2*geschwindigkeit;			
+				b2_x -= 0.3*geschwindigkeit;
+				kak_x -= 1.4*geschwindigkeit;	
+				fe_x -= 1.4*geschwindigkeit;
+
+				punkteTimer-=geschwindigkeit;
+				if (punkteTimer <= 0){
+					punkteTimer = 50;
+					punkte++;
+					console.log(punkte);
+				}
+
+			}					
 			
 			if (wa_x <= -320){
 				wa_x += 320;
@@ -151,16 +246,39 @@
 				w_x += 320;
 			}
 
-			if (b_x <= -320){
-				b_x += 320;
+			if (b_x <= -92){
+				b_x += 320+Math.random()*320;
 			}
 
-			if (b1_x <= -320){
-				b1_x += 320;
+			if (b1_x <= -204){
+				b1_x += 320+Math.random()*320;
 			}
 
-			if (b2_x <= -400){
-				b2_x += 400;
+			if (b2_x <= -412){
+				b2_x += 412+Math.random()*320;
+			}
+
+			if (kak_x <= -30){
+				kak_x += 320 + Math.random()*640;        
+			} 
+
+			if (ch_lebt && kak_x <= 50+15 && kak_x >= 50-24 && ch_y <= 32){
+				console.log("Autsch ☻");
+				ch_lebt = false;
+				y_speed = 3.5;
+				ch_y++;
+			}
+
+			if (fe_x <= -16){
+				fe_x += 340 + Math.random()*10000;
+			}
+
+			if (ch_lebt && fe_x <= 50+14 && fe_x >= 50-28 && ch_y <= 30){
+				console.log("Autsch ☻");
+				ch_lebt = false;
+				ch_brennt = true;
+				y_speed = 3.5;
+				ch_y++;
 			}
 
 		}
@@ -171,22 +289,26 @@
 		function key_down(e){
 				
 			var key_id = e.keyCode || e.which;
-			
-				
-				if (key_id == 32){
+								
+				if (key_id == 32 && !space && ch_lebt ){
 					space = true;
 					e.preventDefault();
 					if (ch_y <= 20){
-						y_speed = 5;
+						y_speed = 3.5;
 						ch_y = 1;
+						document.getElementById("audio_bok").play();
 
 					}
 
 
 					if (spiellaeuft == false){	
-						interval = window.setInterval(zeichnen,10);
+						window.setInterval(zeichnen,10);
 						spiellaeuft = true;
 					}
+				}
+
+				if(key_id == 67 && !ch_lebt){
+					restart();
 				}
 			
 			}
